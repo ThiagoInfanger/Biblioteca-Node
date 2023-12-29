@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Incluir Autores</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+      $(document).ready(function(){
+        function getNacionalidade(){
+          $.ajax({
+            url: "http://localhost:3000/nacionalidades/listar",
+            type: "GET",
+            dataType: "json",
+            success: function (res) {
+              $("#inputNacionalidade").html("<option selected>(Informe)</option>");
+              $.each(res.resultado, function(key, value){
+                $("#inputNacionalidade").append(
+                  "<option value = " + value.IdNacionalidade + ">" + value.NoNacionalidade + "</option>"
+                );
+              });
+            },
+          });
+        }
+        
+        function setNacionalidade(){
+          $.ajax({
+            success: function (res) {
+              let nacionalidade = $("#IdNacionalidade").val();
+              $("#inputNacionalidade option").each(function(){
+                if ($(this).val() == nacionalidade) {
+                  $("#inputNacionalidade option[value='" + nacionalidade + "']").attr('selected', 'selected');
+                }
+              })
+            },
+          });
+        }
+
+        getNacionalidade();
+        setNacionalidade();
+      });
+      
+      function altera(IdAutor){
+        $.ajax({
+          url: "/autores/edit/" + IdAutor,
+          type: "PUT",
+          data: "nome=" + $("#inputAutores").val() + "&nacionalidade=" + $("#inputNacionalidade").val(),
+          success: function (res) {
+            $(location).attr('href', '/autores/listar');
+          },
+        });
+      }
+      </script>
+  </head>
+  <body>
+    <% if (resultado.IdAutor) {%>
+      <input type="hidden" id="IdNacionalidade" name="IdNacionalidade" value="<%= resultado.IdNacionalidade%>">
+      <h1>Alterar Autores</h1>
+      <form method="#" action="/autores/edit/<%= resultado.IdAutor%>" class="row g-3">
+    <%} else {%>
+    <h1>Cadastro de Autores</h1>
+    <form method="POST" action="/autores/add" class="row g-3">
+      <%}%>
+      <div class="col-md-6">
+        <label for="inputAutores" class="form-label">Autor</label>
+        <% if (resultado.IdAutor) {%>
+          <input type="text" class="form-control" id="inputAutores" name= "nome" placeholder="Nome" value="<%= resultado.NoAutor%>">
+        <%} else {%>
+          <input type="text" class="form-control" id="inputAutores" name= "nome" placeholder="Nome">
+        <%}%>
+      </div>
+
+      <div class="col-md-6">
+        <label for="inputNacionalidade" class="form-label">Nacionalidade</label>
+        <select id="inputNacionalidade" class="form-select" name = "nacionalidade">
+          <option selected>Escolha...</option>
+          <option>...</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <% if (resultado.IdAutor) {%>
+          <button type="button" onclick = "altera(<%= resultado.IdAutor%>);" class="btn btn-primary">Salvar</button>
+        <%} else {%>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        <%}%>
+      </div>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  </body>
+</html>
